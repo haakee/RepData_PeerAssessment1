@@ -7,19 +7,85 @@ output:
 
 
 ## Loading and preprocessing the data
-
+```{r}
+unzip("activity.zip")
+df_with_nas <- read.csv("activity.csv")
+# Remove NA rows -- NA only appears in steps column
+df <- df_with_nas[complete.cases(df_with_nas),]
+df$date <- strftime(df$date, format="%Y-%m-%d")
+```
 
 
 ## What is mean total number of steps taken per day?
+```{r message=FALSE}
+library(dplyr)
+daily <- summarize(group_by(df, date), sum(steps))
+names(daily) <- c("date", "steps")
+hist(daily$steps,
+     col="blue",
+     xlab="Daily Steps",
+     main="Histogram of Daily Steps",
+     breaks=8)
 
+cat("Mean daily steps:", mean(daily$steps))
+cat("Median daily steps:", median(daily$steps))
+```
 
 
 ## What is the average daily activity pattern?
+```{r}
+activity_pattern <- df %>%
+  group_by(interval) %>%
+  summarize(Steps = mean(steps))
+plot(activity_pattern, type="l", xlab="Time of day (24 hour clock)")
+
+max_row <- subset(activity_pattern,
+                  activity_pattern$Steps==max(activity_pattern$Steps))
+cat("The interval with the most steps on average was",
+    max_row$interval)
+```
 
 
 
 ## Imputing missing values
+```{r}
+# Calculate and report the total number of missing values in the dataset
+# (i.e. the total number of rows with NAs)
+missing_values <- dim(df_with_nas[!complete.cases(df_with_nas),])[1]
+cat("Number of rows with missing values:", missing_values)
 
+# Devise a strategy for filling in all of the missing values in the dataset.
+# The strategy does not need to be sophisticated. For example, you could use
+# the mean/median for that day, or the mean for that 5-minute interval, etc.
+
+# Use the mean for the 5-minute interval
+df_imputed <-
+  df_with_nas %>% 
+  group_by(interval) %>% 
+  mutate(steps = ifelse(is.na(steps), mean(steps, na.rm = TRUE), steps))
+
+# Make a histogram of the total number of steps taken each day and Calculate
+# and report the mean and median total number of steps taken per day. Do these
+# values differ from the estimates from the first part of the assignment? What
+# is the impact of imputing missing data on the estimates of the total daily
+# number of steps?
+daily_imputed <- summarize(group_by(df_imputed, date), sum(steps))
+names(daily_imputed) <- c("date", "steps")
+hist(daily_imputed$steps,
+     col="blue",
+     xlab="Daily Steps",
+     main="Histogram of Daily Steps",
+     breaks=8)
+
+cat("Mean daily steps:", mean(daily_imputed$steps))
+cat("Median daily steps:", median(daily_imputed$steps))
+```
+
+The mean and median are very close to the previously calculated values. The
+histogram shows a higher peak around the mean/median steps per day.
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
+```{r}
+```
+
