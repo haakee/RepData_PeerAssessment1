@@ -107,4 +107,6 @@ xyplot(Steps~interval|weekend,
        ylab="Number of steps")
 ```
 
-There is some evidence of a morning commute on weekdays. Additionally weekends show more activity later in the evening and less activity in the early morning. Weekend activity is also more constant throughout the day.
+There is some evidence of a morning commute on weekdays. Additionally
+weekends show more activity later in the evening and less activity in the
+early morning. Weekend activity is also more constant throughout the day.
