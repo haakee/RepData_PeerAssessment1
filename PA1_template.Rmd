@@ -86,6 +86,25 @@ histogram shows a higher peak around the mean/median steps per day.
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
-```{r}
+```{r message=FALSE}
+library(lattice)
+daily_imputed$date <- as.Date(daily_imputed$date)
+
+# Weekends start with an "S", we can grep to create a weekday/weekend factor
+df_imputed <- mutate(df_imputed,
+                     weekend=as.factor(grepl("^S",
+                                             weekdays(daily_imputed$date))))
+
+# Need to sum by steps per interval, separated by weekday vs. weekend
+df <- df_imputed %>%
+  group_by(interval, weekend) %>%
+  summarize(Steps = mean(steps))
+df$weekend <- ifelse(df$weekend==TRUE, "weekend", "weekday")
+xyplot(Steps~interval|weekend,
+       df,
+       type="l",
+       layout=c(1,2),
+       ylab="Number of steps")
 ```
 
+There is some evidence of a morning commute on weekdays. Additionally weekends show more activity later in the evening and less activity in the early morning. Weekend activity is also more constant throughout the day.
